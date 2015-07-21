@@ -4,6 +4,7 @@ use strict;
 use warnings;
 
 use Text::Balanced 'extract_codeblock';
+use Math::BigInt;
 
 my %variables = ();
 
@@ -11,9 +12,9 @@ sub get_value {
   my ($value) = @_;
 
   if ($value =~ /^\d/) {
-    return +$value;
+    return Math::BigInt->new($value);
   } else {
-    return $variables{$value} ||= 0;
+    return $variables{$value} ||= Math::BigInt->bzero;
   }
 }
 
@@ -46,9 +47,9 @@ sub execute {
       if ($op eq '=') {
         $variables{$var} = $value;
       } elsif ($op eq '+=') {
-        $variables{$var} += $value;
+        $variables{$var}->badd($value);
       } elsif ($op eq '-=') {
-        $variables{$var} -= $value;
+        $variables{$var}->bsub($value);
       }
     } else {
       die "Parse error: $code";
