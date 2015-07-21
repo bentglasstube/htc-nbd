@@ -1,5 +1,63 @@
-#!/usr/bin/python
+#!/usr/bin/env perl
 
-# To solve this problem, make the './run' executable handle any 
-# appropriate command line arguments and stdin and output the
-# solution to stdout.
+use strict;
+use warnings;
+
+use Text::Balanced 'extract_codeblock';
+
+my %variables = ();
+
+sub get_value {
+  my ($value) = @_;
+
+  if ($value =~ /^\d/) {
+    return +$value;
+  } else {
+    return $variables{$value} ||= 0;
+  }
+}
+
+sub execute {
+  my ($code) = @_;
+
+  my $VARIABLE = qr/[[:alpha:]][:alpha:]\d]*/o;
+  my $VALUE    = qr/[[:alpha:]\d]+/o;
+
+  while ($code) {
+    if ($code =~ s/^\?($VALUE)(?={)//) {    # ifzero
+      my $value = get_value($1);
+
+      my ($block, $rest) = extract_codeblock($code, '{}');
+      $code = $rest;
+      $code =~ s/^;?//g;
+
+      $block =~ s/^{(.*)}$/$1/;
+
+      execute($block) if $value == 0;
+
+    } elsif ($code =~ s/^!($VALUE);?//) {    # println
+      print get_value($1), "\n";
+
+    } elsif ($code =~ s/^($VARIABLE)([+-]?=)($VALUE);?//) {
+      my $var   = $1;
+      my $op    = $2;
+      my $value = get_value($3);
+
+      if ($op eq '=') {
+        $variables{$var} = $value;
+      } elsif ($op eq '+=') {
+        $variables{$var} += $value;
+      } elsif ($op eq '-=') {
+        $variables{$var} -= $value;
+      }
+    } else {
+      die "Parse error: $code";
+    }
+  }
+}
+
+local $/ = undef;
+my $code = <STDIN>;
+$code =~ s/\s//g;
+
+execute($code);
