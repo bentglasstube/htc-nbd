@@ -14,7 +14,7 @@ sub get_value {
   if ($value =~ /^\d/) {
     return Math::BigInt->new($value);
   } else {
-    return $variables{$value} ||= Math::BigInt->bzero;
+    return $variables{$value};
   }
 }
 
@@ -34,7 +34,7 @@ sub execute {
 
       $block =~ s/^{(.*)}$/$1/;
 
-      execute($block) if $value == 0;
+      execute($block) if defined $value and $value == 0;
 
     } elsif ($code =~ s/^!($VALUE);?//) {    # println
       print get_value($1), "\n";
