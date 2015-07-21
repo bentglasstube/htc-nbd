@@ -20,8 +20,8 @@ sub get_value {
 sub execute {
   my ($code) = @_;
 
-  my $VARIABLE = qr/[[:alpha:]][:alpha:]\d]*/o;
-  my $VALUE    = qr/[[:alpha:]\d]+/o;
+  my $VARIABLE = qr/[a-z][a-z\d]*/io;
+  my $VALUE    = qr/[a-z\d]+/io;
 
   while ($code) {
     if ($code =~ s/^\?($VALUE)(?={)//) {    # ifzero
