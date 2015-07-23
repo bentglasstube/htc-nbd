@@ -90,8 +90,8 @@ void eval_block(code *block, map* vars) {
       code_skip_whitespace(block);
       _parse_value(block, &value, vars);
 
-      printf("%lu\n", value);
-      fprintf(stderr, "%lu\n", value);
+      printf("%ld\n", value);
+      fprintf(stderr, "%ld\n", value);
     } else {
       long value;
       char *var = malloc(1024 * sizeof(char));
