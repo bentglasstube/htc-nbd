@@ -39,10 +39,10 @@ void map_set(map *map, char *key, long value) {
     pair->value = value;
   } else {
     if (bucket->count == 0) {
-      bucket->pairs = malloc(sizeof(pair));
+      bucket->pairs = malloc(sizeof(*pair));
       bucket->count = 1;
     } else {
-      bucket->pairs = realloc(bucket->pairs, (bucket->count + 1) * sizeof(pair));
+      bucket->pairs = realloc(bucket->pairs, (bucket->count + 1) * sizeof(*pair));
       bucket->count++;
     }
 
