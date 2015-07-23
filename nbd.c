@@ -21,8 +21,6 @@ void _parse_variable_name(code *code, char* name) {
   memcpy(name, code->source + code->pos * sizeof(char), length);
   code->pos += length;
   name[length] = 0;
-
-  fprintf(stderr, "Got variable name: %s\n", name);
 }
 
 void _parse_integer(code *code, uint64_t* value) {
@@ -33,8 +31,6 @@ void _parse_integer(code *code, uint64_t* value) {
   }
 
   *value = v;
-
-  fprintf(stderr, "Got integer value: %lu\n", v);
 }
 
 void _parse_value(code *code, uint64_t* value, map* vars) {
@@ -57,18 +53,13 @@ void eval_block(code *block, map* vars) {
       uint64_t value = 0;
       size_t start, length = 0;
 
-      fprintf(stderr, "If zero block\n");
       block->pos++;
 
       code_skip_whitespace(block);
       _parse_value(block, &value, vars);
       code_skip_whitespace(block);
 
-      fprintf(stderr, "Value is %lu\n", value);
-
       start = block->pos + 1;
-
-      fprintf(stderr, "Parsing block\n");
 
       while (true) {
         length++;
@@ -76,11 +67,9 @@ void eval_block(code *block, map* vars) {
         if (block->source[block->pos] == '{') {
           brackets++;
           block->pos++;
-          fprintf(stderr, "Open brace (%u)\n", brackets);
         } else if (block->source[block->pos] == '}') {
           brackets--;
           block->pos++;
-          fprintf(stderr, "Close brace (%u)\n", brackets);
           if (brackets == 0) break;
         } else {
           block->pos++;
@@ -89,7 +78,6 @@ void eval_block(code *block, map* vars) {
 
       if (value == 0) {
         code subblock;
-        fprintf(stderr, "Running conditional\n");
 
         code_init(&subblock);
         code_append(&subblock, block->source + start * sizeof(char), length - 2);
@@ -99,13 +87,9 @@ void eval_block(code *block, map* vars) {
     } else if (block->source[block->pos] == '!') {
       uint64_t value = 0;
 
-      fprintf(stderr, "Println block\n");
-
       block->pos++;
       code_skip_whitespace(block);
       _parse_value(block, &value, vars);
-
-      fprintf(stderr, "Printing value %lu\n", value);
 
       printf("%lu\n", value);
     } else {
@@ -117,8 +101,6 @@ void eval_block(code *block, map* vars) {
       code_skip_whitespace(block);
       switch (block->source[block->pos]) {
         case '=':
-          fprintf(stderr, "Assignment\n");
-
           block->pos++;
           code_skip_whitespace(block);
 
@@ -128,8 +110,6 @@ void eval_block(code *block, map* vars) {
           break;
 
         case '+':
-          fprintf(stderr, "Addition\n");
-
           block->pos += 2;
           code_skip_whitespace(block);
 
@@ -139,8 +119,6 @@ void eval_block(code *block, map* vars) {
           break;
 
         case '-':
-          fprintf(stderr, "Subtraction\n");
-
           block->pos += 2;
           code_skip_whitespace(block);
 

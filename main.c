@@ -18,8 +18,6 @@ void main() {
 
   free(buffer);
 
-  fprintf(stderr, "%s\n", code.source);
-
   map_init(&vars, 1024);
 
   eval_block(&code, &vars);

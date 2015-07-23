@@ -1,7 +1,5 @@
 #include "map.h"
 
-#include <stdio.h>
-
 static pair * get_pair(bucket *bucket, const char *key) {
   size_t i;
   pair *pair;
@@ -34,16 +32,12 @@ void map_set(map *map, char *key, uint64_t value) {
   bucket *bucket;
   pair *pair;
 
-  fprintf(stderr, "Setting %s to %lu\n", key, value);
-
   index = hash(key) % map->count;
   bucket = &(map->buckets[index]);
 
   if ((pair = get_pair(bucket, key)) != NULL) {
-    fprintf(stderr, "Key exists, updating\n");
     pair->value = value;
   } else {
-    fprintf(stderr, "Key does not exist, setting\n");
     if (bucket->count == 0) {
       bucket->pairs = malloc(sizeof(pair));
       bucket->count = 1;
@@ -65,8 +59,6 @@ uint64_t map_get(map *map, char *key) {
   size_t index;
   bucket *bucket;
   pair *pair;
-
-  fprintf(stderr, "Getting value of %s\n", key);
 
   index = hash(key) % map->count;
   bucket = &(map->buckets[index]);
