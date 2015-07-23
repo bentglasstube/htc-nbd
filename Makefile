@@ -1,7 +1,18 @@
-all:
-	# If you wanted to build something first you'd put it in here.
-	# You can just delete this file, or you can delete the ./run
-	# file and have this file build a run binary.
-	echo nothing to build
+SRC=$(wildcard *.c)
+OBJ=$(patsubst %.c,%.o,$(SRC))
 
-.PHONY: all
+all: run
+
+run: $(OBJ)
+	$(CC) -o $@ $^
+
+%.o: %.c
+	$(CC) -c -O3 -o $@ $<
+
+clean:
+	rm *.o run
+
+test: run
+	t/runtests
+
+.PHONY: all clean test

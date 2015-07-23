@@ -1,0 +1,20 @@
+#!/bin/bash
+
+inputs=$(find ./t -name 'input*.txt');
+
+error=0
+
+for input in t/*.in; do
+  output=${input%.in}.out
+  result=$(mktemp);
+  ./run <$input >$result;
+  if diff $output $result >/dev/null; then
+    echo "ok $input";
+  else
+    echo "not ok $input";
+    diff $output $result |sed 's/^/# /';
+    error=1
+  fi
+done
+
+exit $error
