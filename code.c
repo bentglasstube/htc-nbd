@@ -8,6 +8,8 @@ void code_init(code *code) {
   code->pos = code->length = 0;
   code->capacity = 1024;
   code->source = malloc(code->capacity * sizeof(char));
+
+  memset(code->source, 0, code->capacity * sizeof(char));
 }
 
 void code_append(code *code, char *data, size_t length) {
@@ -18,6 +20,8 @@ void code_append(code *code, char *data, size_t length) {
 
   memcpy(code->source + code->length * sizeof(char), data, length);
   code->length += length;
+
+  memset(code->source + code->length * sizeof(char), 0, code->capacity - code->length);
 }
 
 bool _is_whitespace(char c) {
