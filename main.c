@@ -4,7 +4,7 @@
 #include "map.h"
 #include "nbd.h"
 
-void main() {
+int main() {
   code code;
   map vars;
   char *buffer;
@@ -24,4 +24,6 @@ void main() {
 
   map_free(&vars);
   code_free(&code);
+
+  return 0;
 }
