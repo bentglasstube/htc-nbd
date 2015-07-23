@@ -6,20 +6,20 @@
 
 typedef struct pair {
   char *key;
-  uint64_t value;
+  int value;
 } pair;
 
 typedef struct bucket {
-  uint64_t count;
+  int count;
   pair *pairs;
 } bucket;
 
 typedef struct map {
-  uint64_t count;
+  int count;
   bucket *buckets;
 } map;
 
-void map_init(map *map, const uint64_t capacity);
-void map_set(map *map, char *key, uint64_t value);
-uint64_t map_get(map *map, char *key);
+void map_init(map *map, const int capacity);
+void map_set(map *map, char *key, int value);
+int map_get(map *map, char *key);
 void map_free(map *map);
