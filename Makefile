@@ -7,7 +7,7 @@ run: $(OBJ)
 	$(CC) -o $@ $^
 
 %.o: %.c
-	$(CC) -c -o $@ $<
+	$(CC) -c -O3 -o $@ $<
 
 clean:
 	rm *.o run
