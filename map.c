@@ -11,8 +11,8 @@ static pair * get_pair(bucket *bucket, const char *key) {
   return NULL;
 }
 
-static uint64_t hash(const char *str) {
-  uint64_t hash = 2839;
+static uint16_t hash(const char *str) {
+  uint16_t hash = 2839;
   char c;
 
   while (c = *str++) {
@@ -21,23 +21,21 @@ static uint64_t hash(const char *str) {
   return hash;
 }
 
-void map_init(map *map, const uint64_t capacity) {
+void map_init(map *map, const uint16_t capacity) {
   map->count = capacity;
   map->buckets = malloc(map->count * sizeof(bucket));
   memset(map->buckets, 0, map->count * sizeof(bucket));
 }
 
-void map_set(map *map, char *key, uint64_t value) {
-  uint64_t index;
+void map_set(map *map, char *key, mpz_t value, bool add) {
+  uint16_t index;
   bucket *bucket;
   pair *pair;
 
   index = hash(key) % map->count;
   bucket = &(map->buckets[index]);
 
-  if ((pair = get_pair(bucket, key)) != NULL) {
-    pair->value = value;
-  } else {
+  if ((pair = get_pair(bucket, key)) == NULL) {
     if (bucket->count == 0) {
       bucket->pairs = malloc(sizeof(*pair));
       bucket->count = 1;
@@ -51,11 +49,17 @@ void map_set(map *map, char *key, uint64_t value) {
     pair->key = malloc((strlen(key) + 1) * sizeof(char));
     strcpy(pair->key, key);
 
-    pair->value = value;
+    mpz_init(pair->value);
+  }
+
+  if (add) {
+    mpz_add(pair->value, pair->value, value);
+  } else {
+    mpz_set(pair->value, value);
   }
 }
 
-uint64_t map_get(map *map, char *key) {
+void map_get(map *map, char *key, mpz_t value) {
   size_t index;
   bucket *bucket;
   pair *pair;
@@ -64,8 +68,8 @@ uint64_t map_get(map *map, char *key) {
   bucket = &(map->buckets[index]);
   pair = get_pair(bucket, key);
 
-  if (pair == NULL) return 0;
-  return pair->value;
+  if (pair == NULL) return;
+  mpz_set(value, pair->value);
 }
 
 void map_free(map *map) {
@@ -76,6 +80,7 @@ void map_free(map *map) {
     for (j = 0; j < bucket->count; ++j) {
       pair *pair = &(bucket->pairs[j]);
       free(pair->key);
+      mpz_clear(pair->value);
     }
     free(bucket->pairs);
   }

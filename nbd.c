@@ -1,5 +1,6 @@
 #include "nbd.h"
 
+#include <gmp.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -23,23 +24,23 @@ void _parse_variable_name(code *code, char* name) {
   name[length] = 0;
 }
 
-void _parse_integer(code *code, uint64_t * value) {
-  uint64_t v = 0;
+void _parse_integer(code *code, mpz_t value) {
+  mpz_set_ui(value, 0);
+
   while (_is_numeric(code->source[code->pos])) {
-    v = v * 10 + code->source[code->pos] - '0';
+    mpz_mul_ui(value, value, 10);
+    mpz_add_ui(value, value, code->source[code->pos] - '0');
     code->pos++;
   }
-
-  *value = v;
 }
 
-void _parse_value(code *code, uint64_t * value, map* vars) {
+void _parse_value(code *code, mpz_t value, map* vars) {
   if (_is_numeric(code->source[code->pos])) {
     _parse_integer(code, value);
   } else {
     char *var = malloc(1024 * sizeof(char));
     _parse_variable_name(code, var);
-    *value = map_get(vars, var);
+    map_get(vars, var, value);
     free(var);
   }
 }
@@ -49,13 +50,15 @@ void eval_block(code *block, map* vars) {
     code_skip_whitespace(block);
 
     if (block->source[block->pos] == '?') {
-      uint64_t brackets = 0, value = 0;
+      uint8_t brackets = 0;
       size_t start, length = 0;
+      mpz_t value;
+      mpz_init(value);
 
       block->pos++;
 
       code_skip_whitespace(block);
-      _parse_value(block, &value, vars);
+      _parse_value(block, value, vars);
       code_skip_whitespace(block);
 
       start = block->pos + 1;
@@ -75,7 +78,7 @@ void eval_block(code *block, map* vars) {
         }
       }
 
-      if (value == 0) {
+      if (mpz_sgn(value) == 0) {
         code subblock;
 
         code_init(&subblock);
@@ -83,18 +86,24 @@ void eval_block(code *block, map* vars) {
         eval_block(&subblock, vars);
         code_free(&subblock);
       }
+
+      mpz_clear(value);
     } else if (block->source[block->pos] == '!') {
-      uint64_t value = 0;
+      mpz_t value;
+      mpz_init(value);
 
       block->pos++;
       code_skip_whitespace(block);
-      _parse_value(block, &value, vars);
+      _parse_value(block, value, vars);
 
-      printf("%ld\n", value);
-      fprintf(stderr, "%ld\n", value);
+      mpz_out_str(stdout, 10, value);
+      printf("\n");
+
+      mpz_clear(value);
     } else {
-      uint64_t value;
       char *var = malloc(1024 * sizeof(char));
+      mpz_t value;
+      mpz_init(value);
 
       _parse_variable_name(block, var);
 
@@ -104,8 +113,8 @@ void eval_block(code *block, map* vars) {
           block->pos++;
           code_skip_whitespace(block);
 
-          _parse_value(block, &value, vars);
-          map_set(vars, var, value);
+          _parse_value(block, value, vars);
+          map_set(vars, var, value, false);
 
           break;
 
@@ -113,8 +122,8 @@ void eval_block(code *block, map* vars) {
           block->pos += 2;
           code_skip_whitespace(block);
 
-          _parse_value(block, &value, vars);
-          map_set(vars, var, map_get(vars, var) + value);
+          _parse_value(block, value, vars);
+          map_set(vars, var, value, true);
 
           break;
 
@@ -122,17 +131,18 @@ void eval_block(code *block, map* vars) {
           block->pos += 2;
           code_skip_whitespace(block);
 
-          _parse_value(block, &value, vars);
-          map_set(vars, var, map_get(vars, var) - value);
+          _parse_value(block, value, vars);
+          mpz_neg(value, value);
+          map_set(vars, var, value, true);
 
           break;
 
         default:
           fprintf(stderr, "Parse error\n");
-          return;
       }
 
       free(var);
+      mpz_clear(value);
     }
 
     code_skip_whitespace(block);

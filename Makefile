@@ -4,7 +4,7 @@ OBJ=$(patsubst %.c,%.o,$(SRC))
 all: run
 
 run: $(OBJ)
-	$(CC) -o $@ $^
+	$(CC) -lgmp -o $@ $^
 
 %.o: %.c
 	$(CC) -c -O3 -o $@ $<
