@@ -11,8 +11,8 @@ static pair * get_pair(bucket *bucket, const char *key) {
   return NULL;
 }
 
-static long long hash(const char *str) {
-  long long hash = 2839;
+static unsigned long long hash(const char *str) {
+  unsigned long long hash = 2839;
   char c;
 
   while (c = *str++) {
@@ -21,14 +21,14 @@ static long long hash(const char *str) {
   return hash;
 }
 
-void map_init(map *map, const long long capacity) {
+void map_init(map *map, const unsigned long long capacity) {
   map->count = capacity;
   map->buckets = malloc(map->count * sizeof(bucket));
   memset(map->buckets, 0, map->count * sizeof(bucket));
 }
 
-void map_set(map *map, char *key, long long value) {
-  long long index;
+void map_set(map *map, char *key, unsigned long long value) {
+  unsigned long long index;
   bucket *bucket;
   pair *pair;
 
@@ -55,7 +55,7 @@ void map_set(map *map, char *key, long long value) {
   }
 }
 
-long long map_get(map *map, char *key) {
+unsigned long long map_get(map *map, char *key) {
   size_t index;
   bucket *bucket;
   pair *pair;

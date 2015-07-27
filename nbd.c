@@ -23,8 +23,8 @@ void _parse_variable_name(code *code, char* name) {
   name[length] = 0;
 }
 
-void _parse_integer(code *code, long long * value) {
-  long long v = 0;
+void _parse_integer(code *code, unsigned long long * value) {
+  unsigned long long v = 0;
   while (_is_numeric(code->source[code->pos])) {
     v = v * 10 + code->source[code->pos] - '0';
     code->pos++;
@@ -33,7 +33,7 @@ void _parse_integer(code *code, long long * value) {
   *value = v;
 }
 
-void _parse_value(code *code, long long * value, map* vars) {
+void _parse_value(code *code, unsigned long long * value, map* vars) {
   if (_is_numeric(code->source[code->pos])) {
     _parse_integer(code, value);
   } else {
@@ -49,7 +49,7 @@ void eval_block(code *block, map* vars) {
     code_skip_whitespace(block);
 
     if (block->source[block->pos] == '?') {
-      long long brackets = 0, value = 0;
+      unsigned long long brackets = 0, value = 0;
       size_t start, length = 0;
 
       block->pos++;
@@ -84,7 +84,7 @@ void eval_block(code *block, map* vars) {
         code_free(&subblock);
       }
     } else if (block->source[block->pos] == '!') {
-      long long value = 0;
+      unsigned long long value = 0;
 
       block->pos++;
       code_skip_whitespace(block);
@@ -93,7 +93,7 @@ void eval_block(code *block, map* vars) {
       printf("%ld\n", value);
       fprintf(stderr, "%ld\n", value);
     } else {
-      long long value;
+      unsigned long long value;
       char *var = malloc(1024 * sizeof(char));
 
       _parse_variable_name(block, var);
